@@ -1,6 +1,7 @@
 package com.bazuma.partytip
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -36,6 +37,7 @@ import com.bazuma.partytip.util.calculateTotalPerPerson
 import com.bazuma.partytip.util.calculateTotalTip
 
 class MainActivity : ComponentActivity() {
+    @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -46,6 +48,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 //Container functions
+@ExperimentalComposeUiApi
 @Composable
 fun MyApp(content :@Composable () -> Unit){
     PartyTipTheme {
@@ -54,7 +57,7 @@ fun MyApp(content :@Composable () -> Unit){
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            content()
+            MainContent()
         }
     }
 }
@@ -82,37 +85,16 @@ fun TopHeader(totalPerPerson:Double=100.0){
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+
+@ExperimentalComposeUiApi
 @Preview
 @Composable
 fun MainContent(){
-    BillForm(){
-
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun BillForm(modifier: Modifier=Modifier,
-            onValChange:(String) -> Unit ={}
-             ){
-    val totalBillState =remember{
-        mutableStateOf("")
-    }
-
-    val validState = remember(totalBillState.value) {
-        totalBillState.value.trim().isNotEmpty()
-    }
-
-    val sliderPositionState = remember {
-        mutableStateOf(0f)
-    }
-
-    val tipPercentage = (sliderPositionState.value * 100).toInt()
-
     val splitByState= remember {
         mutableStateOf(1)
     }
+
+    val range=IntRange(start=1, endInclusive = 100)
 
     val tipAmountState= remember {
         mutableStateOf(0.0)
@@ -121,17 +103,47 @@ fun BillForm(modifier: Modifier=Modifier,
     val  totalPerPersonState= remember {
         mutableStateOf(0.0)
     }
-    val range=IntRange(start=1, endInclusive = 100)
+    Column(modifier = Modifier.padding(all = 12.dp)) {
+        BillForm(
+            splitByState = splitByState,
+            range=range,
+            tipAmountState = tipAmountState,
+            totalPerPersonState =totalPerPersonState ) {}
+    }
+   
+}
 
+@ExperimentalComposeUiApi
+@Composable
+fun BillForm(modifier: Modifier=Modifier,
+             range:IntRange =1..100,
+             splitByState:MutableState<Int>,
+             tipAmountState:MutableState<Double>,
+             totalPerPersonState: MutableState<Double>,
+            onValChange:(String) -> Unit ={},
+             ){
+    val totalBillState =remember{
+        mutableStateOf("")
+    }
+
+    val validState = remember(totalBillState.value) {
+        totalBillState.value.trim().isNotEmpty()
+    }
     val keyboardControler=LocalSoftwareKeyboardController.current
+
+    val sliderPositionState = remember {
+        mutableStateOf(0f)
+    }
+
+    val tipPercentage = (sliderPositionState.value * 100).toInt()
 
     TopHeader(totalPerPerson = totalPerPersonState.value)
 
-    Surface(modifier = Modifier
+    Surface(modifier = modifier
         .padding(2.dp)
         .fillMaxWidth(),
-        shape = CircleShape.copy(all= CornerSize(8.dp)),
-        border = BorderStroke(width = 2.dp, color = Color.LightGray) )
+        shape = RoundedCornerShape(corner=CornerSize(8.dp)),
+        border = BorderStroke(width = 1.dp, color = Color.LightGray) )
     {
         Column(
             modifier = Modifier.padding(6.dp),
@@ -151,21 +163,23 @@ fun BillForm(modifier: Modifier=Modifier,
             )
             if (validState){
                 Row(
-                    modifier = Modifier.padding(3.dp),
-                    horizontalArrangement = Arrangement.Start){
+                    modifier = Modifier.padding(3.dp), horizontalArrangement = Arrangement.Start){
                 Text( "Split",
                     modifier = Modifier.align(
                     alignment = Alignment.CenterVertically
                 ))
+
                 Spacer(modifier =Modifier.width(120.dp))
-                Row(modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.End) {
+
+                    Row(modifier = modifier.padding(horizontal = 3.dp),
+                      horizontalArrangement = Arrangement.End) {
                         RoundIconButton(
                             modifier,
                             imageVector = Icons.Default.Remove ,
                             onClick = {
                                 splitByState.value =
                                     if(splitByState.value > 1) splitByState.value - 1 else 1
+
                                 totalPerPersonState.value=
                                     calculateTotalPerPerson(
                                         totalBill = totalBillState.value.toDouble(),
@@ -175,7 +189,7 @@ fun BillForm(modifier: Modifier=Modifier,
                             })
                         Text(
                                   text = "${splitByState.value}",
-                                  modifier = Modifier
+                                  modifier = modifier
                                       .align(Alignment.CenterVertically)
                                       .padding(start = 9.dp, end = 9.dp))
 
@@ -195,7 +209,7 @@ fun BillForm(modifier: Modifier=Modifier,
                 }
                 }
                 //Tip Row
-                Row (modifier = Modifier
+                Row (modifier = modifier
                     .padding(horizontal = 3.dp,vertical=12.dp)){
                     Text(
                         text = "Tip",
@@ -242,12 +256,13 @@ fun BillForm(modifier: Modifier=Modifier,
 
 
 
+@ExperimentalComposeUiApi
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     PartyTipTheme {
         MyApp {
-            Text(text = "Hello There")
+            //Text(text = "Hello There")
         }
     }
 }
