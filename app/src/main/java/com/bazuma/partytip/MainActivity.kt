@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.bazuma.partytip.Widgets.RoundIconButton
 import com.bazuma.partytip.components.InputField
 import com.bazuma.partytip.ui.theme.PartyTipTheme
+import com.bazuma.partytip.util.calculateTotalPerPerson
+import com.bazuma.partytip.util.calculateTotalTip
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,12 +113,19 @@ fun BillForm(modifier: Modifier=Modifier,
     val splitByState= remember {
         mutableStateOf(1)
     }
+
+    val tipAmountState= remember {
+        mutableStateOf(0.0)
+    }
+
+    val  totalPerPersonState= remember {
+        mutableStateOf(0.0)
+    }
     val range=IntRange(start=1, endInclusive = 100)
-    TopHeader()
 
     val keyboardControler=LocalSoftwareKeyboardController.current
 
-
+    TopHeader(totalPerPerson = totalPerPersonState.value)
 
     Surface(modifier = Modifier
         .padding(2.dp)
@@ -156,9 +165,13 @@ fun BillForm(modifier: Modifier=Modifier,
                             imageVector = Icons.Default.Remove ,
                             onClick = {
                                 splitByState.value =
-                                    if(splitByState.value > 1)
-                                        splitByState.value - 1
-                                    else 1
+                                    if(splitByState.value > 1) splitByState.value - 1 else 1
+                                totalPerPersonState.value=
+                                    calculateTotalPerPerson(
+                                        totalBill = totalBillState.value.toDouble(),
+                                        splitBy = splitByState.value,
+                                        tipPercentage = tipPercentage)
+
                             })
                         Text(
                                   text = "${splitByState.value}",
@@ -171,6 +184,12 @@ fun BillForm(modifier: Modifier=Modifier,
                         onClick = {
                             if (splitByState.value < range.last ){
                                 splitByState.value += 1
+
+                                totalPerPersonState.value=
+                                    calculateTotalPerPerson(
+                                        totalBill = totalBillState.value.toDouble(),
+                                        splitBy = splitByState.value,
+                                        tipPercentage = tipPercentage)
                             }
                         })
                 }
@@ -182,7 +201,7 @@ fun BillForm(modifier: Modifier=Modifier,
                         text = "Tip",
                         modifier = Modifier.align(alignment = Alignment.CenterVertically))
                         Spacer(modifier = Modifier.width(200.dp))
-                        Text(text = "Ksh30")
+                        Text(text = "Ksh ${tipAmountState.value}")
 
                 }
                 Column(verticalArrangement = Arrangement.Center,
@@ -195,6 +214,16 @@ fun BillForm(modifier: Modifier=Modifier,
                         value =sliderPositionState.value ,
                         onValueChange = { newVal ->
                              sliderPositionState.value=newVal
+                             tipAmountState.value=
+                                 calculateTotalTip(totalBill=totalBillState.value.toDouble(),
+                                     tipPercentage=tipPercentage)
+
+                             totalPerPersonState.value=
+                                 calculateTotalPerPerson(
+                                     totalBill = totalBillState.value.toDouble(),
+                                     splitBy = splitByState.value,
+                                     tipPercentage = tipPercentage)
+
                         },
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                             steps = 5,
@@ -210,6 +239,8 @@ fun BillForm(modifier: Modifier=Modifier,
     }
 
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
