@@ -37,18 +37,19 @@ import com.bazuma.partytip.util.calculateTotalPerPerson
 import com.bazuma.partytip.util.calculateTotalTip
 
 class MainActivity : ComponentActivity() {
-    @ExperimentalComposeUiApi
+
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                TopHeader()
+                MainContent()
             }
         }
     }
 }
 //Container functions
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MyApp(content :@Composable () -> Unit){
     PartyTipTheme {
@@ -57,7 +58,7 @@ fun MyApp(content :@Composable () -> Unit){
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            MainContent()
+            content()
         }
     }
 }
@@ -254,15 +255,13 @@ fun BillForm(modifier: Modifier=Modifier,
 
 }
 
-
-
 @ExperimentalComposeUiApi
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     PartyTipTheme {
         MyApp {
-            //Text(text = "Hello There")
+           MainContent()
         }
     }
 }
