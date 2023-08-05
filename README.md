@@ -24,11 +24,7 @@ The Party App for Android is built using the following technologies and tools:
 
 - **Jetpack Compose:** Party App leverages Jetpack Compose, the declarative UI toolkit for building native Android UIs. It allows us to create a fluid and interactive user interface.
 
-- **Android Studio:** The app is developed and managed using Android Studio, the official IDE for Android app development.
-
-- **Firebase Firestore:** We use Firebase Firestore, a cloud-based NoSQL database, to store user data, party information, and expense details securely.
-
-- **Firebase Authentication:** User authentication is implemented using Firebase Authentication to ensure secure user logins and protect user data.
+- **Android Studio:** The app is developed and managed using Android Studio, the official IDE for Android app development.protect user data.
 
 ## How to Clone and Build the App
 
